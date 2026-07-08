@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heart Disease Predictor</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #1d232f;
+      --muted: #667085;
+      --line: #d9dee7;
+      --accent: #0f766e;
+      --accent-2: #2563eb;
+      --danger: #b42318;
+      --warn: #b54708;
+      --ok: #087443;
+      --shadow: 0 16px 40px rgba(28, 37, 54, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(15, 118, 110, 0.10), rgba(37, 99, 235, 0.04) 340px),
+        var(--bg);
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    header {
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.03;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    section, aside {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-panel {
+      padding: 18px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      min-width: 0;
+      border: 1px solid #e5e8ef;
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfe;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 9px;
+      font-weight: 700;
+      font-size: 13px;
+      color: #2f3a4c;
+    }
+
+    .value {
+      color: var(--accent-2);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 10px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .result-panel {
+      position: sticky;
+      top: 18px;
+      padding: 18px;
+    }
+
+    .prediction {
+      border-radius: 8px;
+      padding: 16px;
+      background: #f2f7f6;
+      border: 1px solid #cce7e2;
+      margin-bottom: 14px;
+    }
+
+    .prediction.high {
+      background: #fff4ed;
+      border-color: #ffd6ae;
+    }
+
+    .status {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .result {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.15;
+    }
+
+    .probability {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .meter {
+      height: 14px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e7eaef;
+      margin: 14px 0 16px;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--ok), #d89b00, var(--danger));
+      transition: width 180ms ease;
+    }
+
+    .note {
+      margin: 14px 0 0;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      .layout, .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .shell {
+        width: min(100vw - 20px, 1180px);
+        padding-top: 18px;
+      }
+
+      .panel-title {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .actions button {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <h1>Heart Disease Predictor</h1>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="form-panel" aria-labelledby="input-title">
+        <div class="panel-title">
+          <h2 id="input-title">Patient Inputs</h2>
+          <div class="actions">
+            <button type="button" id="sampleBtn">Sample</button>
+            <button type="button" class="primary" id="resetBtn">Reset</button>
+          </div>
+        </div>
+        <form id="predictForm" class="grid"></form>
+      </section>
+
+      <aside class="result-panel" aria-labelledby="result-title">
+        <h2 id="result-title">Prediction</h2>
+        <div class="meter" aria-hidden="true"><div class="bar" id="bar"></div></div>
+        <div class="prediction" id="predictionBox">
+          <p class="status" id="status">Calculating</p>
+          <p class="result" id="resultText">Waiting for inputs</p>
+        </div>
+        <p class="note">This project UI is for educational prediction only. It should not be used as medical advice or diagnosis.</p>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const model = {
+      columns: ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"],
+      weights: [-0.7215113984797382, -1.1588495886327324, 1.8763023847356164, -0.12599477805311846, -0.2768180135084249, 0.03903766321086625, 0.982477554123873, 0.07856440213473982, -1.0464483055790443, -0.7024969806530845, 0.6226661617558216, 0.14607176380590628, -0.502565204788767],
+      bias: 0.2985281119815811,
+      means: [54.366336633663366, 0.6831683168316832, 0.966996699669967, 131.62376237623764, 246.26402640264027, 0.1485148514851485, 0.528052805280528, 149.64686468646866, 0.32673267326732675, 1.0396039603960396, 1.3993399339933994, 0.7293729372937293, 2.3135313531353137],
+      stds: [9.067101638577872, 0.46524119304834577, 1.0303480250839463, 17.509178065734393, 51.74515101045713, 0.3556096038825341, 0.5249911240963214, 22.86733258188924, 0.46901858543869346, 1.1591574732421364, 0.6152084301256652, 1.0209175011165652, 0.6112653149988237]
+    };
+
+    const fields = [
+      { id: "age", label: "Age", type: "range", min: 29, max: 77, step: 1, value: 55, hint: "Patient age in years." },
+      { id: "sex", label: "Sex", type: "select", value: 1, options: [["0", "Female"], ["1", "Male"]], hint: "Dataset encoding: female 0, male 1." },
+      { id: "cp", label: "Chest Pain Type", type: "select", value: 1, options: [["0", "Typical angina"], ["1", "Atypical angina"], ["2", "Non-anginal pain"], ["3", "Asymptomatic"]], hint: "Chest pain category from the dataset." },
+      { id: "trestbps", label: "Resting BP", type: "range", min: 94, max: 200, step: 1, value: 130, hint: "Resting blood pressure in mm Hg." },
+      { id: "chol", label: "Cholesterol", type: "range", min: 126, max: 564, step: 1, value: 240, hint: "Serum cholesterol in mg/dl." },
+      { id: "fbs", label: "Fasting Blood Sugar", type: "select", value: 0, options: [["0", "120 mg/dl or lower"], ["1", "Above 120 mg/dl"]], hint: "Whether fasting blood sugar is above 120 mg/dl." },
+      { id: "restecg", label: "Rest ECG", type: "select", value: 1, options: [["0", "Normal"], ["1", "ST-T abnormality"], ["2", "LV hypertrophy"]], hint: "Resting electrocardiographic result." },
+      { id: "thalach", label: "Max Heart Rate", type: "range", min: 71, max: 202, step: 1, value: 153, hint: "Maximum heart rate achieved." },
+      { id: "exang", label: "Exercise Angina", type: "select", value: 0, options: [["0", "No"], ["1", "Yes"]], hint: "Exercise induced angina." },
+      { id: "oldpeak", label: "Oldpeak", type: "range", min: 0, max: 6.2, step: 0.1, value: 0.8, hint: "ST depression caused by exercise." },
+      { id: "slope", label: "ST Slope", type: "select", value: 1, options: [["0", "Upsloping"], ["1", "Flat"], ["2", "Downsloping"]], hint: "Slope of the peak exercise ST segment." },
+      { id: "ca", label: "Major Vessels", type: "select", value: 0, options: [["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"]], hint: "Major vessels colored by fluoroscopy." },
+      { id: "thal", label: "Thalassemia", type: "select", value: 2, options: [["0", "Unknown"], ["1", "Fixed defect"], ["2", "Normal"], ["3", "Reversible defect"]], hint: "Thalassemia test result encoding." }
+    ];
+
+    const sample = {
+      age: 41, sex: 0, cp: 1, trestbps: 130, chol: 204, fbs: 0, restecg: 0,
+      thalach: 172, exang: 0, oldpeak: 1.4, slope: 2, ca: 0, thal: 2
+    };
+
+    const form = document.getElementById("predictForm");
+    const bar = document.getElementById("bar");
+    const predictionBox = document.getElementById("predictionBox");
+    const status = document.getElementById("status");
+    const resultText = document.getElementById("resultText");
+
+    function createField(field) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "field";
+
+      const label = document.createElement("label");
+      label.setAttribute("for", field.id);
+      const labelText = document.createElement("span");
+      labelText.textContent = field.label;
+      const valueText = document.createElement("span");
+      valueText.className = "value";
+      valueText.id = `${field.id}-value`;
+      label.append(labelText, valueText);
+
+      let input;
+      if (field.type === "select") {
+        input = document.createElement("select");
+        field.options.forEach(([value, text]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = text;
+          input.appendChild(option);
+        });
+      } else {
+        input = document.createElement("input");
+        input.type = "range";
+        input.min = field.min;
+        input.max = field.max;
+        input.step = field.step;
+      }
+      input.id = field.id;
+      input.name = field.id;
+      input.value = field.value;
+      input.addEventListener("input", update);
+
+      const hint = document.createElement("div");
+      hint.className = "hint";
+      hint.textContent = field.hint;
+
+      wrapper.append(label, input, hint);
+      form.appendChild(wrapper);
+    }
+
+    function values() {
+      return model.columns.map((column) => Number(document.getElementById(column).value));
+    }
+
+    function sigmoid(value) {
+      return 1 / (1 + Math.exp(-Math.max(-35, Math.min(35, value))));
+    }
+
+    function probability(inputValues) {
+      const score = inputValues.reduce((sum, value, index) => {
+        const scaled = (value - model.means[index]) / model.stds[index];
+        return sum + model.weights[index] * scaled;
+      }, model.bias);
+      return sigmoid(score);
+    }
+
+    function formatInput(field, value) {
+      if (field.type === "select") {
+        const match = field.options.find(([optionValue]) => Number(optionValue) === Number(value));
+        return match ? match[1] : value;
+      }
+      return field.id === "oldpeak" ? Number(value).toFixed(1) : String(Math.round(Number(value)));
+    }
+
+    function updateLabels(inputValues) {
+      fields.forEach((field, index) => {
+        document.getElementById(`${field.id}-value`).textContent = formatInput(field, inputValues[index]);
+      });
+    }
+
+    function update() {
+      const inputValues = values();
+      const risk = probability(inputValues);
+      const percentage = Math.round(risk * 1000) / 10;
+      const isHigh = risk >= 0.5;
+
+      updateLabels(inputValues);
+      bar.style.width = `${percentage}%`;
+      predictionBox.classList.toggle("high", isHigh);
+      status.textContent = isHigh ? "Higher risk signal" : "Lower risk signal";
+      resultText.textContent = isHigh ? "Heart disease likely" : "No heart disease likely";
+    }
+
+    function setValues(source) {
+      fields.forEach((field) => {
+        document.getElementById(field.id).value = source[field.id] ?? field.value;
+      });
+      update();
+    }
+
+    fields.forEach(createField);
+    document.getElementById("sampleBtn").addEventListener("click", () => setValues(sample));
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      const defaults = Object.fromEntries(fields.map((field) => [field.id, field.value]));
+      setValues(defaults);
+    });
+    update();
+  </script>
+</body>
+</html>
